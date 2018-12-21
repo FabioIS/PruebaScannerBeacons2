@@ -8,7 +8,7 @@ class Home extends Component {
         return (
                 <View style={styles.container}>
 
-                    <TouchableOpacity onPress={Actions.BeaconDetector}>
+                    <TouchableOpacity onPress={Actions.Scanner}>
                         <View style={styles.circle}>
                             <Text style={styles.text}>
                                 TAP TO PLAY

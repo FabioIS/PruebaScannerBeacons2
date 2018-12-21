@@ -9,7 +9,7 @@ export const Baliza = (Props) => {
     } = Props;
 
     return (
-        <View style={{flex:1}}>
+        <View style={styles.beaconContainer}>
             <Text style={styles.name}>{name}</Text>
             <View style={styles.circle}/>
             <Text style={styles.distance}> {distance}m </Text>
@@ -22,20 +22,25 @@ export const Baliza = (Props) => {
 
 const styles = StyleSheet.create({
     circle: {
-        width: 10,
-        height: 10,
-        borderRadius: 10 / 2,
+        width: 20,
+        height: 20,
+        borderRadius: 20 / 2,
         backgroundColor: 'black'
     },
     distance:{
-        fontSize: 2,
+        fontSize: 10,
     },
     container:{
         alignItems: "center"
     },
     name:{
-        fontSize: 4,
+        fontSize: 15,
         justifyContent: "flex-start"
+    },
+    beaconContainer: {
+        flex: 1,
+       // justifyContent: "center",
+        alignItems: "center"
     }
 });
 

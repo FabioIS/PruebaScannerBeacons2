@@ -1,10 +1,10 @@
 import {addRange, subsRange} from "./actions/DetectorActions";
 import React, {Component} from 'react';
-import {Actions} from 'react-native-router-flux';
 import {StyleSheet, View, Text,TouchableOpacity,ScrollView} from 'react-native';
 import { DeviceEventEmitter } from 'react-native'
 import Kontakt from 'react-native-kontaktio';
 import {connect} from "react-redux";
+import {Actions} from 'react-native-router-flux';
 const {connect2,
     configure,
     disconnect,
@@ -34,7 +34,6 @@ const namespace1 = {
 };
 
 
-
 class BeaconDetector extends Component{
     constructor(props) {
         super(props);
@@ -53,89 +52,9 @@ class BeaconDetector extends Component{
     }
 
     componentDidMount() {
-        connect2(
-            'MY_KONTAKTIO_API_KEY',
-            [EDDYSTONE],
-        )
-            .then(() => configure({
-                scanMode: scanMode.BALANCED,
-                scanPeriod: scanPeriod.RANGING,
-                activityCheckConfiguration: activityCheckConfiguration.DEFAULT,
-                forceScanConfiguration: forceScanConfiguration.MINIMAL,
-                monitoringEnabled: monitoringEnabled.TRUE,
-                monitoringSyncInterval: monitoringSyncInterval.DEFAULT,
-            }))
-            .then(() => setEddystoneNamespace(namespace1))
-            .catch(error => console.log('error', error));
-
-
-        DeviceEventEmitter.addListener(
-            'monitoringCycle',
-            ({ status }) => {
-                console.log('monitoringCycle', status);
-            }
-        );
-
-        // Se ejecuta cuando a parece un beacon eddystone
-        DeviceEventEmitter.addListener(
-            'eddystoneDidAppear',
-            ({ eddystone, namespace }) => {
-                console.log('eddystoneDidAppear', eddystone, namespace);
-                let x = this.state.eddystones;
-                x.push(eddystone);
-                console.log("Heyou", x);
-                this.setState({
-                    eddystones: x
-                });
-
-                console.log("Pusheado : ", this.state.eddystones)
-            }
-        );
-
-        // Se ejecuta cuando desaparece un beacon eddystone
-        DeviceEventEmitter.addListener(
-            'eddystoneDidDisappear',
-            ({ eddystone: lostEddystone, region }) => {
-                console.log('eddystoneDidDisappear', lostEddystone, region);
-
-                const { eddystones } = this.state;
-                const index = eddystones.findIndex(beacon =>
-                    this._isIdenticalBeacon(lostEddystone, beacon)
-                );
-                this.setState({
-                    eddystones: eddystones.reduce((result, val, ind) => {
-                        // don't add disappeared beacon to array
-                        if (ind === index) return result;
-                        // add all other beacons to array
-                        else {
-                            result.push(val);
-                            return result;
-                        }
-                    }, [])
-                });
-            }
-        );
-
-        // Se ejecuta cuando entramos en un namespace (eddystone)
-        DeviceEventEmitter.addListener(
-            'namespaceDidEnter',
-            ({ namespace }) => {
-                console.log('namespaceDidEnter', namespace);
-            }
-        );
-
-        // Se ejecuta cuando salimos de un namespace (eddystone)
-        DeviceEventEmitter.addListener(
-            'namespaceDidExit',
-            ({ status }) => {
-                console.log('namespaceDidExit', status);
-            }
-        );
 
         setInterval(() => {
-            if(this.state.eddystones.length > 0) {
-                this.props.beaconArray.addRange(this.state.eddystones);
-            }
+           this._redux();
         }, 1500);
 
     }
@@ -146,18 +65,15 @@ class BeaconDetector extends Component{
         DeviceEventEmitter.removeAllListeners();
     }
 
-    _startScanning = () => {
-        startScanning()
-            .then(() => this.setState({ scanning: true, statusText: null }))
-            .then(() => console.log('started scanning'))
-            .catch(error => console.log('[startScanning]', error));
+    _redux = () => {
+        //this._restartScanning();
+        if(this.state.eddystones.length > 0) {
+            this.props.addRange(this.state.eddystones);
+        }
     };
-    _stopScanning = () => {
-        stopScanning()
-            .then(() => this.setState({ scanning: false, eddystones: [], beacons: [], statusText: null }))
-            .then(() => console.log('stopped scanning'))
-            .catch(error => console.log('[stopScanning]', error));
-    };
+
+
+
     _restartScanning = () => {
         restartScanning()
             .then(() => this.setState({ scanning: true, eddystones: [], beacons: [], statusText: null }))
@@ -234,8 +150,8 @@ class BeaconDetector extends Component{
         return (
             <View style={styles.container}>
                 <View style={styles.buttonContainer}>
-                    {this._renderButton('Start scan', this._startScanning, '#84e2f9')}
-                    {this._renderButton('Stop scan', this._stopScanning, '#84e2f9')}
+                    {this._renderButton('Start scan', _startScanning, '#84e2f9')}
+                    {this._renderButton('Stop scan', _stopScanning, '#84e2f9')}
                     {this._renderButton('Restart scan', this._restartScanning, '#84e2f9')}
                 </View>
                 <View style={styles.buttonContainer}>

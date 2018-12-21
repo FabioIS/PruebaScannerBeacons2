@@ -6,7 +6,8 @@ import {Baliza} from "./elements/baliza"
 import {DeviceEventEmitter} from 'react-native'
 import connect from "react-redux/es/connect/connect";
 import {Actions} from 'react-native-router-flux';
-import BeaconDetector from '../beaconDetector/beaconDetector'
+import AuxModule from "../auxModule/auxModule";
+import {startScan, stopScan} from "../auxModule/manager/scannerManager"
 
 
 class Scanner extends Component {
@@ -19,7 +20,7 @@ class Scanner extends Component {
 
     componentDidMount(): void {
         setInterval(() => {
-            this.setState();
+            this.setState();b
         }, 1000)
     }
 
@@ -29,23 +30,26 @@ class Scanner extends Component {
             console.log(beacon.name + "showIt");
             result.push(
                 <View style={{flex: 1}}>
-                    <Baliza distance={beacon.accuracy} name={beacon.name}/>
+                    <Baliza distance={parseFloat(beacon.accuracy).toFixed(2)} name={beacon.name}/>
                 </View>
             )
 
         });
         return result;
-    }
+    };
 
 
     render() {
         return (
             <View style={{flex: 1}}>
-                <View style={styles.containerTop}/>
+                <AuxModule/>
+                <View style={styles.containerTop}>
+                    {this._showBeacons()}
+                </View>
                 <View style={styles.containerDown}>
                     <View style={[styles.buttonContainer, {alignSelf: 'flex-start'}]}>
-                        {this._renderButton('Start scanner', '#f2a2a2')}
-                        {this._renderButton('Stop scanner',  '#f2a2a2')}
+                        {this._renderButton('Start scanner', startScan() ,  '#f2a2a2')}
+                        {this._renderButton('Stop scanner', stopScan() , '#f2a2a2')}
                     </View>
                     <View style={styles.triangle}/>
                     <View style={[styles.buttonContainer, {alignSelf: 'flex-end'}]}>
@@ -63,6 +67,7 @@ class Scanner extends Component {
 const styles = StyleSheet.create({
     containerTop: {
         flex: 8,
+        flexDirection: 'row',
         backgroundColor: '#f2a2a2'
     },
     containerDown: {
@@ -99,7 +104,11 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 10,
     },
-    show: {}
+    beaconContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center"
+    }
 });
 
 
@@ -111,5 +120,5 @@ const mapStateToProps = state => {
 
 const mapStateToPropsAction = {};
 
-export default connect(mapStateToProps, mapStateToPropsAction)(Scanner);
+export default connect(mapStateToProps)(Scanner);
 
