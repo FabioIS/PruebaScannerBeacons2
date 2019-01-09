@@ -68,7 +68,7 @@ class BeaconDetector extends Component{
     _redux = () => {
         //this._restartScanning();
         if(this.state.eddystones.length > 0) {
-            this.props.addRange(this.state.eddystones);
+            this.props.addRange();
         }
     };
 
