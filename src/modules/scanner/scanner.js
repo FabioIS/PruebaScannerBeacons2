@@ -1,42 +1,39 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, ScrollView, FlatList} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 //import {connect} from "react-redux";
 import {Baliza} from "./elements/baliza"
 import connect from "react-redux/es/connect/connect";
 import {Actions} from 'react-native-router-flux';
 import AuxModule from "../auxModule/auxModule";
 import {startScan, stopScan} from "../auxModule/auxModule";
+import AwesomeButton from 'react-native-really-awesome-button'
 
 class Scanner extends Component {
 
-    _renderButton = (text, onPress, backgroundColor) => (
-        <TouchableOpacity style={[styles.button, {backgroundColor}]} onPress={onPress}>
-            <Text>{text}</Text>
-        </TouchableOpacity>
-    );
+    interval;
+    percentage;
 
-    componentDidMount(): void {
-        setInterval(() => {
-            console.log("Cambiando el scanner");
+
+    // _renderButton = (text, onPress, backgroundColor) => (
+    //
+    //     // <TouchableOpacity style={[styles.button, {backgroundColor}]} onPress={onPress}>
+    //     //     <Text>{text}</Text>
+    //     // </TouchableOpacity>
+    // );
+
+    componentDidMount() {
+        this.interval = setInterval(() => {
             this.setState();
         }, 1000)
     }
 
-    _showBeacons(): [] {
-        let result = [];
-        if (this.props.beaconArray.beaconsOnRange.length > 0) {
-            this.props.beaconArray.beaconsOnRange.map((beacon) => {
-                console.log(beacon.name + " showIt");
-                result.push(
-                    <Baliza distance={parseFloat(beacon.accuracy).toFixed(2)} name={beacon.name}/>
-                )
+    componentWillUnmount(): void {
+        clearInterval(this.interval);
+    }
 
-            });
-        }
-        if (result.length > 0) {
-            return (<FlatList data={result} renderItem={({item}) =>  <View style={{flex: 1}}>{item}</View>} />)
-        }
-        return result;
+    _showBeacons(beacon, dimension) {
+        return <Baliza distance={parseFloat(beacon.accuracy).toFixed(2)} name={beacon.name}
+                       size={this.props.beaconArray.beaconsOnRange.length} height={dimension}/>
 
     }
 
@@ -44,17 +41,32 @@ class Scanner extends Component {
         return (
             <View style={{flex: 1}}>
                 <AuxModule/>
-                <View style={styles.containerTop}>
-                    {this.props.beaconArray.beaconsOnRange.length > 0 ? this._showBeacons() : null}
+                <View style={styles.containerTop} onLayout={(event) => {
+                    this.percentage = {height} = event.nativeEvent.layout;
+                }}>
+                    {this.props.beaconArray.beaconsOnRange.length > 0 ? this.props.beaconArray.beaconsOnRange.map(
+                        (beacon) => {
+                            return this._showBeacons(beacon, this.percentage);
+                        }) : null}
                 </View>
                 <View style={styles.containerDown}>
                     <View style={[styles.buttonContainer, {alignSelf: 'flex-start'}]}>
-                        {this._renderButton('Start scanner', startScan, '#f2a2a2')}
-                        {this._renderButton('Stop scanner', stopScan, '#f2a2a2')}
+                        <AwesomeButton
+                            progress
+                            onPress={(next) => {
+                                /** Do Something **/
+                                next();
+                            }}>
+                            Start Scanner
+                        </AwesomeButton>
+
                     </View>
-                    <View style={styles.triangle}/>
+                    <View style={{flex:1, alignItems:'center', borderLeftWidth: 2, borderRightWidth: 2, borderColor:'rgb(0, 164, 211)'}}>
+                        <View style={styles.triangle}/>
+                        <Text style={styles.text}>Your Position</Text>
+                    </View>
                     <View style={[styles.buttonContainer, {alignSelf: 'flex-end'}]}>
-                        {this._renderButton('Show beacons on range', Actions.BeaconDetector, '#f2a2a2')}
+
                     </View>
                 </View>
             </View>
@@ -69,13 +81,17 @@ const styles = StyleSheet.create({
     containerTop: {
         flex: 8,
         flexDirection: 'row',
-        backgroundColor: '#f2a2a2'
+        backgroundColor: '#fefefe'
     },
     containerDown: {
         flexDirection: "row",
         flex: 2,
-        backgroundColor: "blue",
+        backgroundColor: "#52abbc",
         // alignItems: 'center'
+
+    },
+    text:{
+        fontSize: 20,
 
     },
     triangle: {
@@ -119,7 +135,6 @@ const mapStateToProps = state => {
     }
 };
 
-const mapStateToPropsAction = {};
 
 export default connect(mapStateToProps)(Scanner);
 

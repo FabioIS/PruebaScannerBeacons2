@@ -1,10 +1,11 @@
-import {addRange, subsRange} from "./actions/DetectorActions";
+import {addRange} from "./actions/DetectorActions";
 import React, {Component} from 'react';
 import {StyleSheet, View, Text,TouchableOpacity,ScrollView} from 'react-native';
 import { DeviceEventEmitter } from 'react-native'
 import Kontakt from 'react-native-kontaktio';
 import {connect} from "react-redux";
 import {Actions} from 'react-native-router-flux';
+
 const {connect2,
     configure,
     disconnect,
@@ -53,9 +54,9 @@ class BeaconDetector extends Component{
 
     componentDidMount() {
 
-        setInterval(() => {
-           this._redux();
-        }, 1500);
+        // setInterval(() => {
+        //    this._redux();
+        // }, 1500);
 
     }
 
@@ -206,6 +207,6 @@ const mapStateToProps = state => {
 
 
 
-const mapStateToPropsAction = {addRange, subsRange};
+const mapStateToPropsAction = {addRange};
 
 export default connect(mapStateToProps, mapStateToPropsAction)(BeaconDetector);

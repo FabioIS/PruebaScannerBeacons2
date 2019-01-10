@@ -3,16 +3,33 @@ import {View, Text, StyleSheet} from 'react-native';
 
 
 export const Baliza = (Props) => {
+
     const {
         distance,
-        name
+        name,
+        size,
     } = Props;
+
+    function _getPercentage(distance) {
+        return 95-(distance*5);
+    }
+
 
     return (
         <View style={styles.beaconContainer}>
-            <Text style={styles.name}>{name}</Text>
-            <View style={styles.circle}/>
-            <Text style={styles.distance}> {distance}m </Text>
+            <Text style={{fontSize: 30 / size, justifyContent: "flex-start"}}>{name}</Text>
+            <View style={[{
+                width: 40 / size,
+                height: 40 / size,
+                borderRadius: (40 / 2) / size,
+                top: _getPercentage(parseFloat(distance).toFixed(1)) + '%'
+            }, styles.circle]}/>
+            <Text style={{
+                fontSize: 20 / size,
+
+            }}>
+                {distance}m
+            </Text>
         </View>
 
 
@@ -21,26 +38,15 @@ export const Baliza = (Props) => {
 };
 
 const styles = StyleSheet.create({
-    circle: {
-        width: 20,
-        height: 20,
-        borderRadius: 20 / 2,
-        backgroundColor: 'black'
-    },
-    distance:{
-        fontSize: 10,
-    },
-    container:{
-        alignItems: "center"
-    },
-    name:{
-        fontSize: 15,
-        justifyContent: "flex-start"
-    },
     beaconContainer: {
         flex: 1,
-       // justifyContent: "center",
+        //justifyContent: "center",
         alignItems: "center"
+
+    },
+    circle: {
+        backgroundColor: 'black',
+        position: 'absolute'
     }
 });
 

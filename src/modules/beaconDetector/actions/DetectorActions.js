@@ -8,17 +8,23 @@ export const addRange = (beacons) => async (dispatch) => {
     })
 };
 
-export const subsRange = (id) => async (dispatch, getState) => {
-    const {beaconsOnRange} = getState().RangeReducer;
-    for (let i = 0; i < beaconsOnRange.length; i++) {
-        if (beaconsOnRange[i].id === parseInt(id, 10)) {
-            beaconsOnRange.splice(i, 1);
-            break;
-        }
-    }
+export const empty = () => async (dispatch, getState) => {
     dispatch({
-        type: Types.SUBS_BEACON_ON_RANGE,
-        payload: beaconsOnRange.slice(),
+        type: Types.EMPTY
     })
+}
 
-};
+// export const subsRange = (id) => async (dispatch, getState) => {
+//     const {beaconsOnRange} = getState().RangeReducer;
+//     for (let i = 0; i < beaconsOnRange.length; i++) {
+//         if (beaconsOnRange[i].id === parseInt(id, 10)) {
+//             beaconsOnRange.splice(i, 1);
+//             break;
+//         }
+//     }
+//     dispatch({
+//         type: Types.SUBS_BEACON_ON_RANGE,
+//         payload: beaconsOnRange.slice(),
+//     })
+//
+// };

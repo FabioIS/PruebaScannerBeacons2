@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import {DeviceEventEmitter, PermissionsAndroid} from "react-native";
 import Kontakt from 'react-native-kontaktio';
-import {addRange, subsRange} from "../beaconDetector/actions/DetectorActions";
+import {addRange, empty} from "../beaconDetector/actions/DetectorActions";
 import {connect} from "react-redux";
+import RangeReducer from '../beaconDetector/reducers/RangeReducer'
 
 const {
     connect2,
@@ -56,17 +57,16 @@ async function requestPermissions() {
 }
 
 export const startScan = () => {
-    console.log("Is scanning madakaca");
     startScanning()
         .then(() => console.log('started scanning'))
         .catch(error => console.log('[startScanning]', error));
 }
 
 export function stopScan() {
-    console.log("Estamos parando la vaina");
     stopScanning()
         .then(() => console.log('stopped scanning'))
         .catch(error => console.log('[stopScanning]', error));
+    empty();
 }
 
 
@@ -88,7 +88,6 @@ class AuxModule extends Component {
     }
 
     async componentDidMount() {
-        console.log("Parece que conectamos");
         await requestPermissions();
         connect2(
             'MY_SCANNER',
@@ -117,23 +116,44 @@ class AuxModule extends Component {
             'eddystoneDidAppear',
             ({eddystone, namespace}) => {
                 let depurator = false;
-                console.log('eddystoneDidAppear', eddystone, namespace);
                 let x = this.state.eddystones;
                 x.map((beacon) => {
-                    console.log("asere", this._isIdenticalBeacon(beacon, eddystone));
-                    if(this._isIdenticalBeacon(beacon, eddystone)){
+                    if (this._isIdenticalBeacon(beacon, eddystone)) {
                         depurator = true;
-                } });
+                    }
+                });
                 !depurator ? x.push(eddystone) : null;
                 depurator = false;
-                console.log("Heyou", x);
                 this.setState({
                     eddystones: x
                 });
-
-                console.log("Pusheado : ", this.state.eddystones)
+                this.props.addRange(this.state.eddystones);
+                console.log("Eddystone prueba add 1", this.props.beaconArray.beaconsOnRange);
             }
         );
+
+        // Se ejecuta cuando algún valor de los beacons se modifica.
+        DeviceEventEmitter.addListener(
+            'eddystonesDidUpdate',
+            ({eddystones, region}) => {
+                console.log('eddystonesDidUpdate', eddystones);
+
+                let beacons = this.props.beaconArray.beaconsOnRange;
+                eddystones.forEach(updatedBeacon => {
+                    const index = beacons.findIndex(beacon =>
+                        this._isIdenticalBeacon(updatedBeacon, beacon)
+                    );
+                    this.setState({
+                        eddystones: beacons.reduce((result, val, ind) => {
+                            // replace current beacon values for updatedBeacon, keep current value for others
+                            ind === index ? result.push(updatedBeacon) : result.push(val);
+                            return result;
+                        }, [])
+                    });
+
+                });
+                this.props.addRange(this.state.eddystones);
+            });
 
         // Se ejecuta cuando desaparece un beacon eddystone
         DeviceEventEmitter.addListener(
@@ -156,6 +176,8 @@ class AuxModule extends Component {
                         }
                     }, [])
                 });
+                this.props.addRange(this.state.eddystones);
+                console.log("Eddystone prueba subs 1", this.props.beaconArray.beaconsOnRange);
             }
         );
 
@@ -175,10 +197,10 @@ class AuxModule extends Component {
             }
         );
 
-        setInterval(() => {
-            console.log("Cambiando el redux");
-            this._redux();
-        }, 1500);
+        // setInterval(() => {
+        //     console.log("Cambiando el redux");
+        //     this._redux();
+        // }, 1500);
 
     }
 
@@ -194,7 +216,7 @@ class AuxModule extends Component {
         DeviceEventEmitter.removeAllListeners();
     }
 
-    _redux = () =>{
+    _redux = () => {
         console.log("Estamos añadiendo al redux");
         this.props.addRange(this.state.eddystones)
 
@@ -225,7 +247,7 @@ const mapStateToProps = state => {
 };
 
 
-const mapStateToPropsAction = {addRange, subsRange};
+const mapStateToPropsAction = {addRange, empty};
 
 
 export default connect(mapStateToProps, mapStateToPropsAction)(AuxModule);
